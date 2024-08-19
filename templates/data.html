@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Summaries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: url('/static/img.jpg');
+            background-size: cover;
+            background-position: center;
+            overflow-y: scroll; /* Ensure the body can scroll */
+        }
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 7px;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            z-index: 1000;
+        }
+        header {
+            top: 0;
+            justify-content: space-between; /* To align items on both ends */
+        }
+        header img {
+            height: 85px;
+            margin: 0 auto;
+        }
+        .sidebar-toggle {
+            margin-left: 20px; /* Adjust to move towards right */
+            cursor: pointer;
+            font-size: 24px; /* Increase the font size */
+            padding: 10px; /* Add some padding */
+        }
+        .container {
+            text-align: center;
+            font-family: 'Great Vibes', cursive;
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #371D10;
+            width: 50%;
+            margin-top: 120px; /* Adjust margin to fit below the header */
+            margin-bottom: 50px; /* Adjust margin to fit above the footer */
+        }
+        .feedback-link {
+            color: #231709;
+        }
+        .feedback-link:hover {
+            color: #3F301D;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: rgba(255, 255, 255, 0.6);
+            transition: 0.5s;
+            z-index: 1000;
+            padding-top: 100px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #111;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        .type {
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 1.5em;
+            background-color: #9A7B4F;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out; /* Add smooth transition */
+        }
+        .type:hover {
+            background-color: #80471c; /* Adjust hover color */
+        }
+        .dropdown-content {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 2px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        .summary-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .summary-link {
+            color: blue;
+            text-decoration: none;
+        }
+        .summary-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="sidebar-toggle" onclick="openSidebar()">&#9776;</span>
+        <img src="/static/Logo.png" alt="Insightify">
+    </header>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">×</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="/">Summarize Another Video</a>
+    </div>
+    <div class="container">
+        <h1 style="color: #231709;">Saved Summaries</h1>
+        
+        <!-- Dropdowns for different types -->
+        <div class="type" onclick="toggleDropdown('agriculture')">Agriculture</div>
+        <div id="agriculture" class="dropdown-content">
+            {% for summary in summaries['Agriculture'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('business')">Business</div>
+        <div id="business" class="dropdown-content">
+            {% for summary in summaries['Business'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('culture')">Culture</div>
+        <div id="culture" class="dropdown-content">
+            {% for summary in summaries['Culture'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('education')">Education</div>
+        <div id="education" class="dropdown-content">
+            {% for summary in summaries['Education'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('entertainment')">Entertainment</div>
+        <div id="entertainment" class="dropdown-content">
+            {% for summary in summaries['Entertainment'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('food')">Family</div>
+        <div id="food" class="dropdown-content">
+            {% for summary in summaries['Food'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('gaming')">Gaming</div>
+        <div id="gaming" class="dropdown-content">
+            {% for summary in summaries['Gaming'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('health')">Health</div>
+        <div id="health" class="dropdown-content">
+            {% for summary in summaries['Health'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    
+        <div class="type" onclick="toggleDropdown('jobs')">Jobs</div>
+        <div id="jobs" class="dropdown-content">
+            {% for summary in summaries['Jobs'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="type" onclick="toggleDropdown('politics')">Politics</div>
+        <div id="politics" class="dropdown-content">
+            {% for summary in summaries['Politics'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('sports')">Sports</div>
+        <div id="sports" class="dropdown-content">
+            {% for summary in summaries['Sports'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('tourism')">Tourism</div>
+        <div id="tourism" class="dropdown-content">
+            {% for summary in summaries['Tourism'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('tech')">Tech</div>
+        <div id="tech" class="dropdown-content">
+            {% for summary in summaries['Tech'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="type" onclick="toggleDropdown('others')">Others</div>
+        <div id="others" class="dropdown-content">
+            {% for summary in summaries['Others'] %}
+            <div class="summary-item">
+                <h3>Link: <a href="{{ summary.video_url }}" target="_blank" class="summary-link">Click here</a></h3>
+                <p>Summary:<br>{{ summary.summary }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <script>
+        function openSidebar() {
+            document.getElementById("mySidebar").style.left = "0";
+        }
+        
+        function closeSidebar() {
+            document.getElementById("mySidebar").style.left = "-250px";
+        }
+        
+        function toggleDropdown(type) {
+            var dropdown = document.getElementById(type);
+            var isVisible = getComputedStyle(dropdown).display === 'block';
+            if (!isVisible) {
+                // Hide all other dropdowns
+                var allDropdowns = document.querySelectorAll('.dropdown-content');
+                allDropdowns.forEach(function(d) {
+                    if (d.id !== type) {
+                        d.style.display = 'none';
+                    }
+                });
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

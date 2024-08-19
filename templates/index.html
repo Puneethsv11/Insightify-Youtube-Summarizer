@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: url('/static/img.jpg') no-repeat center center;
+            background-size: cover;
+            overflow-y: auto;
+        }
+        header, footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 7px;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            z-index: 1000;
+        }
+        header {
+            top: 0;
+            justify-content: space-between; /* To align items on both ends */
+        }
+        footer {
+            bottom: 0;
+        }
+        header img {
+            height: 85px;
+            margin: 0 auto;
+        }
+        .sidebar-toggle {
+            margin-left: 20px; /* Adjust to move towards right */
+            cursor: pointer;
+            font-size: 24px; /* Increase the font size */
+            padding: 10px; /* Add some padding */
+        }
+        .container {
+            text-align: center;
+            font-family: 'Great Vibes', cursive;
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #371D10;
+            position: relative; /* Added for loader positioning */
+            width: 50%;
+            height: 35%;
+            max-height: 70vh;
+            margin-top: 100px; /* Adjust margin to fit below the header */
+        }
+        .container input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .container button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            border: none;
+            background-color: #65350F;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #795C34;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 5px 10px;
+            background-color: #65360fb1;
+            box-shadow: 0 2px 10px rgba(218, 228, 148, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            font-size: 14px;
+            color: black;
+        }
+        .popup.visible {
+            display: block;
+        }
+        .feedback-link {
+            color: #231709;
+        }
+        .feedback-link:hover {
+            color: #3F301D;
+        }
+        /* Keyframes for fadeInDown animation */
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Apply animation to .insightify */
+        .insightify {
+            animation: fadeInDown 1s ease-out; /* Adjust timing and easing as needed */
+        }
+        /* Loader Styles */
+        .loader {
+            width: 40px;
+            height: 20px;
+            --c: no-repeat radial-gradient(farthest-side, #65360fb1 93%, #65360fb1 );
+            background:
+                var(--c) 0    0,
+                var(--c) 50%  0;
+            background-size: 8px 8px;
+            position: absolute;
+            top: 85%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            clip-path: inset(-200% -100% 0 0);
+            animation: l6-0 1.5s linear infinite;
+            display: none; /* Hidden initially */
+        }
+        .loader:before {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 12px;
+            background: #3F301D ;
+            left: -16px;
+            top: 0;
+            animation: 
+                l6-1 1.5s linear infinite,
+                l6-2 0.5s cubic-bezier(0, 200, .8, 200) infinite;
+        }
+        .loader:after {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto auto;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #65360fb1 ; 
+            animation: l6-3 1.5s linear infinite;
+        }
+        @keyframes l6-0 {
+            0%, 30% { background-position: 0  0   , 50% 0   }
+            33%     { background-position: 0  100%, 50% 0   }
+            41%, 63% { background-position: 0  0   , 50% 0   }
+            66%     { background-position: 0  0   , 50% 100% }
+            74%, 100% { background-position: 0  0   , 50% 0   }
+        }
+        @keyframes l6-1 {
+            90%  { transform: translateY(0) }
+            95%  { transform: translateY(15px) }
+            100% { transform: translateY(15px); left: calc(100% - 8px) }
+        }
+        @keyframes l6-2 {
+            100% { top: -0.1px }
+        }
+        @keyframes l6-3 {
+            0%, 80%, 100% { transform: translate(0) }
+            90%           { transform: translate(26px) }
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: rgba(255, 255, 255, 0.6);
+            transition: 0.5s;
+            z-index: 1000;
+            padding-top: 100px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #111;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="sidebar-toggle" onclick="openSidebar()">&#9776;</span>
+        <img src="/static/Logo.png" alt="Insightify" class="insightify">
+    </header>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">×</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="/summaries">Summaries</a>
+    </div>
+    <div class="container">
+        <h1 style="font-size: 40px;">YouTube Video Summarizer</h1>
+        <p>Turn Hours into Minutes: Effortlessly Summarize YouTube with AI</p>
+        <input type="text" placeholder="https://www.youtube.com/watch?v=XXXXXX" id="youtube-url">
+        <button onclick="generateSummary()">Generate Summary</button>
+        <!-- Loader -->
+        <div id="loader" class="loader"></div>
+        <!-- End of Loader -->
+    </div>
+
+    <footer>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSeSCVjlVlRbUqc8fl4HDkcUso6EHizyPELAflioydluGUv6Nw/viewform?usp=sf_link" class="feedback-link">Write a Feedback</a>
+    </footer>
+    <div id="popup" class="popup">Summary copied to clipboard!</div>
+    <script>
+        function openSidebar() {
+            document.getElementById("mySidebar").style.left = "0";
+        }
+        
+        function closeSidebar() {
+            document.getElementById("mySidebar").style.left = "-250px";
+        }
+
+        function generateSummary() {
+            const urlInput = document.getElementById('youtube-url').value;
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block'; // Show the loader
+
+            fetch('/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: urlInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = 'none'; // Hide the loader
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    window.location.href = `/summary?summary=${encodeURIComponent(data.summary)}&brief_summary=${encodeURIComponent(data.brief_summary)}&video_url=${encodeURIComponent(urlInput)}`;
+                }
+            })
+            .catch(error => {
+                loader.style.display = 'none'; // Hide the loader
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: url('/static/img.jpg');
+            background-size: cover;
+            background-position: center;
+            overflow-y: auto;
+        }
+        header, footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 7px;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            z-index: 1000;
+        }
+        header {
+            top: 0;
+            justify-content: space-between; /* To align items on both ends */
+        }
+        footer {
+            bottom: 0;
+        }
+        header img {
+            height: 85px;
+            margin: 0 auto;
+        }
+        .sidebar-toggle {
+            margin-left: 20px; /* Adjust to move towards right */
+            cursor: pointer;
+            font-size: 24px; /* Increase the font size */
+            padding: 10px; /* Add some padding */
+        }
+        .container {
+            text-align: center;
+            font-family: 'Great Vibes', cursive;
+            background-color: rgba(255, 255, 255, 0.4);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #371D10;
+            width: 50%;
+            max-height: 80vh;
+            overflow: hidden; /* Hide overflow from container */
+            margin-top: 100px; /* Adjust margin to fit below the header */
+        }
+        .summary {
+            text-align: left;
+            width: 100%;
+            padding: 20px; /* Adjusted padding for better fit */
+            overflow-y: auto; /* Enable scroll for summary only */
+            max-height: calc(80vh - 200px); /* Calculate max height for summary */
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .summary p {
+            margin: 0; /* Remove default margin for <p> */
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center; /* Center align the buttons */
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+        .buttons button, .buttons select {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            background-color: #65350F;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buttons button:hover, .buttons select:hover {
+            background-color: #795C34;
+        }
+        .feedback-link {
+            color: #231709;
+        }
+        .feedback-link:hover {
+            color: #3F301D;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: rgba(255, 255, 255, 0.6);
+            transition: 0.5s;
+            z-index: 1000;
+            padding-top: 100px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #111;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="sidebar-toggle" onclick="openSidebar()">&#9776;</span>
+        <img src="/static/Logo.png" alt="Insightify">
+    </header>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">×</a>
+        <a href="{{ url_for('index') }}">Home</a> 
+        <a href="/summaries">Summaries</a>
+    </div>
+    <div class="container">
+        <h1 style="font-size: 40px;">Video Summary</h1>
+        <div class="summary">
+            <strong>Summary:</strong>
+            <p>{{ summary }}</p>
+        </div>
+        <div class="buttons">
+            <select id="summaryType">
+                <option value="" disabled selected>Select type</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Business">Business</option>
+                <option value="Culture">Culture</option>
+                <option value="Education">Education</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Food">Food</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Health">Health</option>
+                <option value="Jobs">Jobs</option>
+                <option value="Politics">Politics</option>
+                <option value="Sports">Sports</option>
+                <option value="Tourism">Tourism</option>
+                <option value="Tech">Tech</option>
+                <option value="Others">Others</option>
+            </select>
+            <button id="saveButton">Save</button>
+            <button onclick="window.location.href='/'">Summarize Another Video</button>
+        </div>
+    </div>
+    <footer>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSeSCVjlVlRbUqc8fl4HDkcUso6EHizyPELAflioydluGUv6Nw/viewform?usp=sf_link" class="feedback-link">Write a Feedback</a>
+    </footer>
+    <script>
+        function openSidebar() {
+            document.getElementById("mySidebar").style.left = "0";
+        }
+        function closeSidebar() {
+            document.getElementById("mySidebar").style.left = "-250px";
+        }
+
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const selectedOption = document.getElementById('summaryType').value;
+            const summaryText = "{{ summary }}";
+            const videoUrl = "{{ request.args.get('video_url') }}";
+
+            if (!selectedOption) {
+                alert('Please select a type.');
+                return;
+            }
+
+            fetch('/save_summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    summary: summaryText,
+                    video_url: videoUrl,
+                    type: selectedOption
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
